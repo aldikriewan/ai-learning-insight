@@ -8,10 +8,11 @@
     "prisma:generate": "prisma generate",
     "db:migrate": "prisma migrate dev -n init",
     "db:seed": "node prisma/seed_users.js",
+    "db:seed:demo": "node prisma/seed_demo.js",
     "db:seed:presentation": "node prisma/seed_presentation.js",
     "db:reset-enroll": "ts-node ./prisma/resetEnroll.ts",
-    "start": "node dist/index.js"
-    "build": "tsc",
+    "start": "node dist/index.js",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "",
