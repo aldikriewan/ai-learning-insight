@@ -38,7 +38,7 @@ export default function AdminDashboard() {
   if (loading) {
     return (
       <div className="flex justify-center pt-20">
-        <Loader2 className="animate-spin h-8 w-8 text-blue-600" />
+        <Loader2 className="animate-spin h-8 w-8 text-info" />
       </div>
     );
   }
@@ -50,28 +50,28 @@ export default function AdminDashboard() {
       value: stats.counts.students,
       icon: Users,
       desc: "Pengguna aktif terdaftar",
-      color: "text-blue-600",
+      color: "text-primary",
     },
     {
       title: "Kelas Published",
       value: stats.counts.courses,
       icon: BookOpen,
       desc: "Materi siap dipelajari",
-      color: "text-violet-600",
+      color: "text-primary",
     },
     {
       title: "Total Enrollment",
       value: stats.counts.enrollments,
       icon: Activity,
       desc: "Partisipasi belajar",
-      color: "text-green-600",
+      color: "text-primary",
     },
     {
       title: "Perlu Review",
       value: stats.counts.pending_review,
       icon: AlertCircle,
       desc: "Tugas menunggu penilaian",
-      color: "text-orange-600",
+      color: "text-primary",
     },
   ];
 

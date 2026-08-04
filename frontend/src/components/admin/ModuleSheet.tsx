@@ -231,25 +231,25 @@ export default function ModuleSheet({
                       <SelectContent>
                         <SelectItem value="article">
                           <div className="flex items-center">
-                            <FileText className="w-4 h-4 mr-2 text-blue-500" />{" "}
+                            <FileText className="w-4 h-4 mr-2 text-info" />{" "}
                             Artikel (Teks & Gambar)
                           </div>
                         </SelectItem>
                         <SelectItem value="video">
                           <div className="flex items-center">
-                            <Video className="w-4 h-4 mr-2 text-red-500" />{" "}
+                            <Video className="w-4 h-4 mr-2 text-destructive" />{" "}
                             Video (YouTube)
                           </div>
                         </SelectItem>
                         <SelectItem value="submission">
                           <div className="flex items-center">
-                            <Code className="w-4 h-4 mr-2 text-purple-500" />{" "}
+                            <Code className="w-4 h-4 mr-2 text-primary" />{" "}
                             Submission (Tugas Coding)
                           </div>
                         </SelectItem>
                         <SelectItem value="quiz">
                           <div className="flex items-center">
-                            <HelpCircle className="w-4 h-4 mr-2 text-green-500" />{" "}
+                            <HelpCircle className="w-4 h-4 mr-2 text-success" />{" "}
                             Quiz (Pilihan Ganda)
                           </div>
                         </SelectItem>

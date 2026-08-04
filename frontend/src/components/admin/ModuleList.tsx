@@ -24,13 +24,13 @@ type ModuleListProps = {
 const getIcon = (type: string) => {
   switch (type) {
     case "video":
-      return <Video className="w-4 h-4 text-blue-600" />;
+      return <Video className="w-4 h-4 text-info" />;
     case "submission":
-      return <Code className="w-4 h-4 text-purple-600" />;
+      return <Code className="w-4 h-4 text-primary" />;
     case "quiz":
-      return <CheckCircle className="w-4 h-4 text-green-600" />;
+      return <CheckCircle className="w-4 h-4 text-success" />;
     default:
-      return <FileText className="w-4 h-4 text-slate-600" />;
+      return <FileText className="w-4 h-4 text-muted-foreground" />;
   }
 };
 
@@ -89,7 +89,7 @@ export default function ModuleList({
                   size="icon"
                   onClick={() => onDelete(mod.id)}
                 >
-                  <Trash className="w-4 h-4 text-red-600" />
+                  <Trash className="w-4 h-4 text-destructive" />
                 </Button>
                 <div className="cursor-grab px-1  hidden sm:flex">
                   <GripVertical className="w-4 h-4" />

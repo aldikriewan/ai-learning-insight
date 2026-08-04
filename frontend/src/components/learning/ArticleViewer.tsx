@@ -9,7 +9,7 @@ const BlockNoteViewer = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="h-40 bg-slate-100 animate-pulse rounded-lg" />
+      <div className="h-40 bg-muted animate-pulse rounded-lg" />
     ),
   }
 );
@@ -19,7 +19,7 @@ export default function ArticleViewer({ content }: { content: string }) {
     content && typeof content === "string" && content.trim().startsWith("[");
 
   return (
-    <div className="max-w-4xl mx-auto bg-white p-8 rounded-xl border shadow-sm min-h-[50vh]">
+    <div className="max-w-4xl mx-auto bg-background p-8 rounded-xl border shadow-sm min-h-[50vh]">
       {isBlockNote ? (
         <BlockNoteViewer content={content || "[]"} />
       ) : (

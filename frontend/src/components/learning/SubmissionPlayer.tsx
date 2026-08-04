@@ -24,12 +24,12 @@ export default function SubmissionPlayer({ module, onSubmit, loading }: Props) {
   // VIEW: UNDER REVIEW
   if (status === "submitted") {
     return (
-      <Card className="p-10 text-center bg-yellow-50 border-yellow-200 max-w-2xl mx-auto">
-        <Clock className="w-16 h-16 mx-auto text-yellow-600 mb-4 animate-pulse" />
-        <h3 className="text-2xl font-bold text-yellow-800 mb-2">
+      <Card className="p-10 text-center bg-warning/10 border-warning/20 max-w-2xl mx-auto">
+        <Clock className="w-16 h-16 mx-auto text-warning mb-4 animate-pulse" />
+        <h3 className="text-2xl font-bold text-warning-foreground mb-2">
           Sedang Direview
         </h3>
-        <p className="text-yellow-700">
+        <p className="text-warning-foreground/80">
           Tugas sedang diperiksa oleh instruktur.
         </p>
       </Card>
@@ -39,11 +39,11 @@ export default function SubmissionPlayer({ module, onSubmit, loading }: Props) {
   // VIEW: PASSED
   if (status === "passed") {
     return (
-      <Card className="p-10 text-center bg-green-50 border-green-200 max-w-2xl mx-auto">
-        <CheckCircle className="w-16 h-16 mx-auto text-green-600 mb-4" />
-        <h3 className="text-2xl font-bold text-green-800 mb-2">Tugas Lulus!</h3>
+      <Card className="p-10 text-center bg-success/10 border-success/20 max-w-2xl mx-auto">
+        <CheckCircle className="w-16 h-16 mx-auto text-success mb-4" />
+        <h3 className="text-2xl font-bold text-success mb-2">Tugas Lulus!</h3>
         {feedback && (
-          <div className="mt-4 bg-white/60 p-4 rounded text-left text-sm text-green-900">
+          <div className="mt-4 bg-white/60 p-4 rounded text-left text-sm text-success-foreground">
             <strong>Feedback:</strong> {feedback}
           </div>
         )}
@@ -57,27 +57,27 @@ export default function SubmissionPlayer({ module, onSubmit, loading }: Props) {
   return (
     <Card
       className={`p-6 max-w-2xl mx-auto border ${
-        isFailed ? "border-red-200 bg-red-50" : "border-blue-100 bg-blue-50/30"
+        isFailed ? "border-destructive/20 bg-destructive/10" : "border-info/20 bg-info/10"
       }`}
     >
       <div className="text-center mb-8">
         {isFailed ? (
           <>
-            <XCircle className="w-12 h-12 mx-auto text-red-600 mb-2" />
-            <h3 className="text-xl font-bold text-red-800">
+            <XCircle className="w-12 h-12 mx-auto text-destructive mb-2" />
+            <h3 className="text-xl font-bold text-destructive">
               Revisi Diperlukan
             </h3>
             {feedback && (
-              <p className="text-red-700 text-sm mt-2 bg-white/50 p-2 rounded">
+              <p className="text-destructive/80 text-sm mt-2 bg-white/50 p-2 rounded">
                 "{feedback}"
               </p>
             )}
           </>
         ) : (
           <>
-            <Code className="w-12 h-12 mx-auto text-blue-600 mb-2" />
-            <h3 className="text-xl font-bold text-blue-900">Upload Tugas</h3>
-            <p className="text-blue-700/80 text-sm">
+            <Code className="w-12 h-12 mx-auto text-info mb-2" />
+            <h3 className="text-xl font-bold text-info-foreground">Upload Tugas</h3>
+            <p className="text-info-foreground/80 text-sm">
               Kerjakan tugas sesuai instruksi di atas.
             </p>
           </>
@@ -86,7 +86,7 @@ export default function SubmissionPlayer({ module, onSubmit, loading }: Props) {
 
       <div className="space-y-4 bg-white p-6 rounded-xl border shadow-sm">
         <div>
-          <label className="text-sm font-medium mb-1.5 block text-slate-700">
+          <label className="text-sm font-medium mb-1.5 block text-foreground">
             Link Repository / Project
           </label>
           <Input
@@ -96,7 +96,7 @@ export default function SubmissionPlayer({ module, onSubmit, loading }: Props) {
           />
         </div>
         <div>
-          <label className="text-sm font-medium mb-1.5 block text-slate-700">
+          <label className="text-sm font-medium mb-1.5 block text-foreground">
             Catatan (Opsional)
           </label>
           <Textarea

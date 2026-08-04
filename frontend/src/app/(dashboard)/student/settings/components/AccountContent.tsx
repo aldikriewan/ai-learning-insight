@@ -68,7 +68,7 @@ const AccountContent = () => {
       if (response.ok) {
         toast.success("Password berhasil diubah!", {
           description: "Silakan login ulang jika diperlukan.",
-          icon: <CheckCircle2 className="text-green-500" />,
+          icon: <CheckCircle2 className="text-success" />,
         });
 
         // Reset form setelah sukses
@@ -78,7 +78,7 @@ const AccountContent = () => {
       } else {
         // Tampilkan error dari backend (misal: "Password lama salah")
         toast.error(data.message || "Gagal mengubah password", {
-          icon: <AlertCircle className="text-red-500" />,
+          icon: <AlertCircle className="text-destructive" />,
         });
       }
     } catch (error) {
@@ -138,16 +138,16 @@ const AccountContent = () => {
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="Ulangi password baru"
             required
-            className={
-              newPassword && confirmPassword && newPassword !== confirmPassword
-                ? "border-red-500 focus-visible:ring-red-500"
-                : ""
-            }
+              className={
+                newPassword && confirmPassword && newPassword !== confirmPassword
+                  ? "border-destructive focus-visible:ring-destructive"
+                  : ""
+              }
           />
           {newPassword &&
             confirmPassword &&
             newPassword !== confirmPassword && (
-              <p className="text-xs text-red-500">Password tidak cocok.</p>
+              <p className="text-xs text-destructive">Password tidak cocok.</p>
             )}
         </div>
 

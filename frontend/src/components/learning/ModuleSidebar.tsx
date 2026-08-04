@@ -33,15 +33,15 @@ type Props = {
 function StatusPill({ status }: { status?: string }) {
   if (!status) return null;
   const map: Record<string, { label: string; cls: string }> = {
-    finished: { label: "Selesai", cls: "bg-emerald-100 text-emerald-800" },
-    in_progress: { label: "Sedang", cls: "bg-blue-50 text-blue-700" },
-    viewed: { label: "Dilihat", cls: "bg-slate-100 text-slate-700" },
-    submitted: { label: "Review", cls: "bg-amber-100 text-amber-800" },
-    failed: { label: "Revisi", cls: "bg-red-100 text-red-800" },
+    finished: { label: "Selesai", cls: "bg-success/10 text-success" },
+    in_progress: { label: "Sedang", cls: "bg-info/10 text-info" },
+    viewed: { label: "Dilihat", cls: "bg-muted text-muted-foreground" },
+    submitted: { label: "Review", cls: "bg-warning/10 text-warning" },
+    failed: { label: "Revisi", cls: "bg-destructive/10 text-destructive" },
   };
   const item = map[status] ?? {
     label: status,
-    cls: "bg-slate-100 text-slate-700",
+    cls: "bg-muted text-muted-foreground",
   };
   return (
     <span
@@ -59,20 +59,20 @@ export default function ModuleSidebar({
   currentModuleId,
 }: Props) {
   return (
-    <aside className="flex flex-col h-full w-80 shrink-0 bg-white border-r">
+    <aside className="flex flex-col h-full w-80 shrink-0 bg-background border-r">
       <div className="px-4 py-4 border-b">
         <div className="flex items-center justify-between gap-2">
           <div>
             <Link
               href={`/courses/${courseId}`}
-              className="inline-flex items-center text-xs  hover:text-slate-800"
+              className="inline-flex items-center text-xs  hover:text-foreground"
             >
               <ChevronLeft className="w-3 h-3 mr-1" /> Kembali ke Kelas
             </Link>
-            <h3 className="mt-2 text-sm font-semibold text-slate-900 leading-tight line-clamp-2">
+            <h3 className="mt-2 text-sm font-semibold text-foreground leading-tight line-clamp-2">
               {courseTitle}
             </h3>
-            <p className="mt-1 text-xs text-slate-400">
+            <p className="mt-1 text-xs text-muted-foreground">
               Daftar modul & progres
             </p>
           </div>
@@ -91,8 +91,8 @@ export default function ModuleSidebar({
                 className={cn(
                   "flex items-start gap-3 p-3 rounded-lg transition-colors",
                   isActive
-                    ? "bg-gradient-to-r from-white to-blue-50 ring-1 ring-blue-100 shadow-sm"
-                    : "hover:bg-slate-50"
+                    ? "bg-gradient-to-r from-white to-info/10 ring-1 ring-info/20 shadow-sm"
+                    : "hover:bg-muted"
                 )}
               >
                 <div className="flex-shrink-0">
@@ -100,10 +100,10 @@ export default function ModuleSidebar({
                     className={cn(
                       "h-9 w-9 rounded-lg flex items-center justify-center text-sm font-semibold",
                       mod.is_completed
-                        ? "bg-emerald-100 text-emerald-700"
+                        ? "bg-success/10 text-success"
                         : isLocked
-                        ? "bg-slate-100 text-slate-400"
-                        : "bg-blue-50 text-blue-700"
+                        ? "bg-muted text-muted-foreground"
+                        : "bg-info/10 text-info"
                     )}
                   >
                     {mod.position ?? i + 1}
@@ -115,7 +115,7 @@ export default function ModuleSidebar({
                     href={baseLink}
                     className={cn(
                       "block text-sm font-medium truncate",
-                      isActive ? "text-blue-700" : "text-slate-800",
+                      isActive ? "text-info" : "text-foreground",
                       isLocked
                         ? "pointer-events-none opacity-60"
                         : "hover:underline"
@@ -127,7 +127,7 @@ export default function ModuleSidebar({
                   </Link>
 
                   <div className="mt-2 flex items-center gap-2">
-                    <span className="text-[11px]  bg-slate-100 px-2 py-0.5 rounded uppercase tracking-wide">
+                    <span className="text-[11px]  bg-muted px-2 py-0.5 rounded uppercase tracking-wide">
                       {mod.type}
                     </span>
 
@@ -139,20 +139,20 @@ export default function ModuleSidebar({
                         Selesai
                       </Badge>
                     ) : isLocked ? (
-                      <span className="text-[11px] text-red-500">Terkunci</span>
+                      <span className="text-[11px] text-destructive">Terkunci</span>
                     ) : null}
                   </div>
                 </div>
 
                 <div className="flex items-start gap-2">
                   {mod.is_completed ? (
-                    <CheckCircle className="w-5 h-5 text-emerald-600 mt-1" />
+                    <CheckCircle className="w-5 h-5 text-success mt-1" />
                   ) : isLocked ? (
-                    <Lock className="w-5 h-5 text-slate-300 mt-1" />
+                    <Lock className="w-5 h-5 text-muted mt-1" />
                   ) : isActive ? (
-                    <PlayCircle className="w-5 h-5 text-blue-600 mt-1" />
+                    <PlayCircle className="w-5 h-5 text-info mt-1" />
                   ) : (
-                    <Circle className="w-4 h-4 text-slate-300 mt-1" />
+                    <Circle className="w-4 h-4 text-muted mt-1" />
                   )}
                 </div>
               </div>

@@ -184,21 +184,21 @@ export default function AdminGradingPage() {
                       locale: idLocale,
                     })}
                   </TableCell>
-                  <TableCell>
-                    <a
-                      href={sub.app_link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center text-blue-600 hover:underline text-sm"
-                    >
-                      Buka Link <ExternalLink className="ml-1 h-3 w-3" />
-                    </a>
-                    {sub.app_comment && (
-                      <div className="mt-1 text-xs  italic max-w-[200px] truncate">
-                        "{sub.app_comment}"
-                      </div>
-                    )}
-                  </TableCell>
+                   <TableCell>
+                     <a
+                       href={sub.app_link}
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       className="flex items-center text-info hover:underline text-sm"
+                     >
+                       Buka Link <ExternalLink className="ml-1 h-3 w-3" />
+                     </a>
+                     {sub.app_comment && (
+                       <div className="mt-1 text-xs  italic max-w-[200px] truncate">
+                         "{sub.app_comment}"
+                       </div>
+                     )}
+                   </TableCell>
                   <TableCell className="text-right">
                     <Button size="sm" onClick={() => handleOpenReview(sub)}>
                       Nilai Tugas
@@ -229,14 +229,14 @@ export default function AdminGradingPage() {
                 <a
                   href={selectedSub.app_link}
                   target="_blank"
-                  className="text-blue-600 underline"
+                  className="text-info underline"
                 >
                   {selectedSub.app_link}
                 </a>
               </p>
               <p>
                 <strong>Komentar Siswa:</strong>{" "}
-                <span className="italic text-slate-600">
+                <span className="italic text-muted-foreground">
                   {selectedSub.app_comment || "-"}
                 </span>
               </p>
@@ -263,13 +263,13 @@ export default function AdminGradingPage() {
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="passed">
-                            <div className="flex items-center text-green-600">
+                            <div className="flex items-center text-success">
                               <CheckCircle className="w-4 h-4 mr-2" /> Lulus
                               (Pass)
                             </div>
                           </SelectItem>
                           <SelectItem value="failed">
-                            <div className="flex items-center text-red-600">
+                            <div className="flex items-center text-destructive">
                               <XCircle className="w-4 h-4 mr-2" /> Revisi (Fail)
                             </div>
                           </SelectItem>

@@ -36,16 +36,16 @@ export default function QuizPlayer({ module, onComplete }: any) {
 
   if (result?.passed) {
     return (
-      <Card className="p-10 text-center bg-green-50 border-green-200">
-        <CheckCircle className="w-16 h-16 mx-auto text-green-600 mb-4" />
-        <h3 className="text-2xl font-bold text-green-800">Quiz Lulus!</h3>
-        <p className="text-green-700">Skor: {Math.round(result.score)}</p>
+      <Card className="p-10 text-center bg-success/10 border-success/20">
+        <CheckCircle className="w-16 h-16 mx-auto text-success mb-4" />
+        <h3 className="text-2xl font-bold text-success">Quiz Lulus!</h3>
+        <p className="text-success">Skor: {Math.round(result.score)}</p>
       </Card>
     );
   }
 
   return (
-    <Card className="p-6 border-slate-200">
+    <Card className="p-6 border-border">
       <div className="text-center mb-8">
         <Badge variant="outline" className="mb-2">
           Quiz
@@ -67,8 +67,8 @@ export default function QuizPlayer({ module, onComplete }: any) {
               {q.options.map((opt: string, oIdx: number) => (
                 <div
                   key={oIdx}
-                  className={`flex items-center space-x-2 p-3 border rounded-lg hover:bg-slate-50 cursor-pointer ${
-                    answers[idx] === oIdx ? "border-blue-500 bg-blue-50" : ""
+                  className={`flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted cursor-pointer ${
+                    answers[idx] === oIdx ? "border-info bg-info/10" : ""
                   }`}
                 >
                   <RadioGroupItem

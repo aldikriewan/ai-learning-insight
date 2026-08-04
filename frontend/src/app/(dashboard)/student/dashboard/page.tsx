@@ -109,7 +109,7 @@ export default function StudentDashboard() {
   return (
     <div className="space-y-6">
       {/* Welcome Banner */}
-      <div className="relative overflow-hidden rounded-2xl bg-linear-to-br from-primary/90 via-primary to-primary/80 p-6 md:p-8 text-primary-foreground">
+      <div className="relative overflow-hidden rounded-2xl bg-linear-to-br from-[oklch(0.35_0.12_75)] via-[oklch(0.20_0.04_250)] to-[oklch(0.15_0.03_250)] p-6 md:p-8 text-primary-foreground">
         <div className="absolute inset-0 bg-grid-white/10 mask-[linear-gradient(0deg,transparent,rgba(255,255,255,0.5))]" />
         <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
         <div className="absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
@@ -119,12 +119,12 @@ export default function StudentDashboard() {
             <div className="flex items-center gap-2">
               <Badge
                 variant="secondary"
-                className="bg-white/20 text-white hover:bg-white/30 border-0 dark:bg-black/30"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 border-0"
               >
                 Dashboard
               </Badge>
             </div>
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight font-display">
               Selamat datang, {user?.name || "Learner"}! 👋
             </h1>
             <p className="text-primary-foreground/80 max-w-lg">
@@ -259,7 +259,7 @@ export default function StudentDashboard() {
 
                 <div className="flex items-center gap-4 py-4 mb-4 border-t">
                   <div className="flex-1">
-                    <p className="uppercase text-sm text-slate-600 font-light pb-3 dark:text-white">
+                    <p className="uppercase text-sm text-muted-foreground font-light pb-3">
                       Tipe Belajar Anda
                     </p>
                     <p className="text-xl font-bold capitalize">

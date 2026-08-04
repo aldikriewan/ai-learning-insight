@@ -348,7 +348,7 @@ export default function AdminCoursesPage() {
                               <Pencil className="mr-2 h-4 w-4" /> Edit Konten
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              className="text-red-600"
+                              className="text-destructive"
                               onClick={() => handleDelete(course.id)}
                             >
                               <Trash className="mr-2 h-4 w-4" /> Hapus

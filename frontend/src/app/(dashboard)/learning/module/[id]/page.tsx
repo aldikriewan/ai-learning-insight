@@ -266,16 +266,16 @@ export default function LearningPlayerPage() {
       try {
         questions = module.content ? JSON.parse(module.content) : [];
       } catch {
-        return <div className="text-red-500">Error parsing quiz data</div>;
+        return <div className="text-destructive">Error parsing quiz data</div>;
       }
 
       // Already passed
       if (quizResult?.passed || module.current_status === "finished") {
         return (
-          <Card className="p-10 text-center  border-green-200">
-            <CheckCircle className="w-16 h-16 mx-auto text-green-600 mb-4" />
-            <h3 className="text-2xl font-bold text-green-800">Quiz Lulus!</h3>
-            <p className="text-green-700">
+          <Card className="p-10 text-center  border-success/20">
+            <CheckCircle className="w-16 h-16 mx-auto text-success mb-4" />
+            <h3 className="text-2xl font-bold text-success">Quiz Lulus!</h3>
+            <p className="text-success">
               Skor Anda: {Math.round(quizResult?.score || 100)}
             </p>
             <p className="text-sm  mt-4">
@@ -312,7 +312,7 @@ export default function LearningPlayerPage() {
         return (
           <Card className="p-10 max-w-2xl mx-auto mt-4 text-center ">
             <div className="w-20 h-20 mx-auto mb-6 rounded-full  flex items-center justify-center">
-              <PlayCircle className="w-10 h-10 text-blue-600" />
+              <PlayCircle className="w-10 h-10 text-info" />
             </div>
             <Badge variant="outline" className="mb-3">
               Quiz
@@ -381,7 +381,7 @@ export default function LearningPlayerPage() {
                       key={oIdx}
                       className={`flex items-center space-x-2 p-3 border rounded-lg cursor-pointer ${
                         quizAnswers[qIdx] === oIdx
-                          ? "border-blue-500 "
+                          ? "border-info bg-info/10 "
                           : ""
                       }`}
                     >
@@ -404,11 +404,11 @@ export default function LearningPlayerPage() {
 
           {/* Show retry message if failed */}
           {quizResult && !quizResult.passed && (
-            <div className="mt-6 p-4  border border-red-200 rounded-lg text-center">
-              <p className="text-red-700 font-medium">
+            <div className="mt-6 p-4  border border-destructive/20 rounded-lg text-center">
+              <p className="text-destructive font-medium">
                 Skor: {Math.round(quizResult.score)} - Belum mencapai KKM
               </p>
-              <p className="text-red-600 text-sm mt-1">
+              <p className="text-destructive/80 text-sm mt-1">
                 Silakan coba lagi dengan menjawab ulang
               </p>
             </div>
@@ -441,12 +441,12 @@ export default function LearningPlayerPage() {
       // Submitted / Under Review
       if (status === "submitted") {
         return (
-          <Card className="p-8 max-w-2xl mx-auto mt-8 border border-yellow-200 bg-yellow-50 text-center">
-            <Clock className="w-16 h-16 mx-auto text-yellow-600 mb-4 animate-pulse" />
-            <h3 className="text-2xl font-bold text-yellow-800 mb-2">
+          <Card className="p-8 max-w-2xl mx-auto mt-8 border border-warning/20 bg-warning/10 text-center">
+            <Clock className="w-16 h-16 mx-auto text-warning mb-4 animate-pulse" />
+            <h3 className="text-2xl font-bold text-warning-foreground mb-2">
               Sedang Direview
             </h3>
-            <p className="text-yellow-700">
+            <p className="text-warning-foreground/80">
               Tugas Anda sedang diperiksa oleh instruktur.
             </p>
             <div className="mt-4 text-sm ">
@@ -461,16 +461,16 @@ export default function LearningPlayerPage() {
       // Passed / Finished
       if (status === "finished" || module.submission_status === "passed") {
         return (
-          <Card className="p-8 max-w-2xl mx-auto mt-8 border border-green-200 text-center">
-            <CheckCircle className="w-16 h-16 mx-auto text-green-600 mb-4" />
-            <h3 className="text-2xl font-bold text-green-800 mb-2">
+          <Card className="p-8 max-w-2xl mx-auto mt-8 border border-success/20 text-center">
+            <CheckCircle className="w-16 h-16 mx-auto text-success mb-4" />
+            <h3 className="text-2xl font-bold text-success mb-2">
               Tugas Lulus!
             </h3>
-            <p className="text-green-700 mb-4">
+            <p className="text-success mb-4">
               Selamat, Anda telah menyelesaikan modul ini.
             </p>
             {note && (
-              <div className=" p-4 rounded-lg text-sm text-left border border-green-200">
+              <div className=" p-4 rounded-lg text-sm text-left border border-success/20">
                 <strong>Feedback Instruktur:</strong>
                 <div className="mt-2">{note}</div>
               </div>
@@ -486,22 +486,22 @@ export default function LearningPlayerPage() {
         <Card
           className={`p-6 max-w-2xl mx-auto mt-8 border ${
             isFailed
-              ? "border-red-200 bg-red-50"
-              : "border-blue-100 bg-blue-50/50"
+              ? "border-destructive/20 bg-destructive/10"
+              : "border-info/20 bg-info/10"
           }`}
         >
           <div className="text-center mb-6">
             {isFailed ? (
               <>
-                <XCircle className="w-12 h-12 mx-auto text-red-600 mb-2" />
-                <h3 className="text-xl font-bold text-red-900">
+                <XCircle className="w-12 h-12 mx-auto text-destructive mb-2" />
+                <h3 className="text-xl font-bold text-destructive">
                   Revisi Diperlukan
                 </h3>
-                <p className="text-red-700 mb-4">
+                <p className="text-destructive/80 mb-4">
                   Silakan perbaiki dan kirim ulang.
                 </p>
                 {note && (
-                  <div className=" p-3 rounded text-sm text-red-800 mb-4 text-left">
+                  <div className=" p-3 rounded text-sm text-destructive mb-4 text-left">
                     <strong>Catatan Revisi:</strong>
                     <div className="mt-1">{note}</div>
                   </div>
@@ -509,7 +509,7 @@ export default function LearningPlayerPage() {
               </>
             ) : (
               <>
-                <Code className="w-12 h-12 mx-auto text-blue-600 mb-2" />
+                <Code className="w-12 h-12 mx-auto text-info mb-2" />
                 <h3 className="text-xl font-bold ">
                   Submission Project
                 </h3>
@@ -544,7 +544,7 @@ export default function LearningPlayerPage() {
             size="lg"
             onClick={handleAction}
             disabled={actionLoading}
-            className="bg-blue-600 "
+            className="bg-primary "
           >
             {actionLoading ? (
               <Loader2 className="animate-spin mr-2" />

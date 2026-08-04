@@ -106,10 +106,10 @@ export default function QuizBuilder({ initialContent, onChange }: Props) {
       {questions.map((q, qIdx) => (
         <Card
           key={qIdx}
-          className="p-4 border-slate-300 relative bg-slate-50/50"
+          className="p-4 border-border relative bg-muted/50"
         >
           <div className="flex items-start gap-3">
-            <div className="mt-2 text-slate-400">
+            <div className="mt-2 text-muted-foreground">
               <Badge
                 variant="outline"
                 className="h-6 w-6 flex items-center justify-center p-0 bg-white"
@@ -144,12 +144,12 @@ export default function QuizBuilder({ initialContent, onChange }: Props) {
                       onClick={() => setCorrectAnswer(qIdx, oIdx)}
                       className={`
                             cursor-pointer w-5 h-5 rounded-full border flex items-center justify-center transition-colors
-                            ${
-                              q.correctIndex === oIdx
-                                ? "bg-green-500 border-green-500 text-white"
-                                : "border-slate-300 bg-white hover:border-slate-400"
-                            }
-                        `}
+                             ${
+                               q.correctIndex === oIdx
+                                 ? "bg-success border-success text-white"
+                                 : "border-border bg-white hover:border-primary"
+                             }
+                         `}
                       title="Tandai sebagai jawaban benar"
                     >
                       {q.correctIndex === oIdx && (
@@ -176,7 +176,7 @@ export default function QuizBuilder({ initialContent, onChange }: Props) {
                       type="button"
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-slate-400 hover:text-red-500"
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
                       onClick={() => removeOption(qIdx, oIdx)}
                     >
                       <X className="w-4 h-4" />
@@ -201,7 +201,7 @@ export default function QuizBuilder({ initialContent, onChange }: Props) {
               type="button"
               variant="ghost"
               size="icon"
-              className="text-slate-400 hover:text-red-600 hover:bg-red-50"
+              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
               onClick={() => removeQuestion(qIdx)}
             >
               <Trash className="w-4 h-4" />
@@ -213,7 +213,7 @@ export default function QuizBuilder({ initialContent, onChange }: Props) {
       <Button
         type="button"
         variant="default"
-        className="w-full border-dashed border-2 bg-transparent text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+        className="w-full border-dashed border-2 bg-transparent text-foreground hover:bg-muted hover:text-foreground"
         onClick={addQuestion}
       >
         <Plus className="w-4 h-4 mr-2" /> Tambah Pertanyaan Baru

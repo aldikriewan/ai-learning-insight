@@ -16,7 +16,7 @@ export const ProfileTabs = () => {
   ];
 
   return (
-    <div className="flex gap-1 p-1 bg-slate-100 rounded-lg w-fit mb-6">
+    <div className="flex gap-1 p-1 bg-muted rounded-lg w-fit mb-6">
       {tabs.map((tab) => {
         const isActive = pathname === tab.href;
         const Icon = tab.icon;
@@ -29,8 +29,8 @@ export const ProfileTabs = () => {
               flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all
               ${
                 isActive
-                  ? "bg-white text-slate-900 shadow-sm"
-                  : " hover:text-slate-700"
+                  ? "bg-background text-foreground shadow-sm"
+                  : " hover:text-foreground"
               }
             `}
           >

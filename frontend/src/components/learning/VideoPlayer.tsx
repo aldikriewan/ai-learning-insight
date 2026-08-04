@@ -23,7 +23,7 @@ export default function VideoPlayer({
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           />
         ) : (
-          <div className="flex items-center justify-center h-full text-slate-400 bg-slate-900">
+          <div className="flex items-center justify-center h-full text-muted-foreground bg-secondary">
             <p>URL Video tidak valid atau kosong</p>
           </div>
         )}

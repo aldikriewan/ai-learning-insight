@@ -153,7 +153,7 @@ export default function LoginPage() {
             Belum punya akun?{" "}
             <Link
               href="/register"
-              className="text-blue-600 hover:underline font-medium"
+              className="text-primary hover:underline font-medium"
             >
               Daftar disini
             </Link>
