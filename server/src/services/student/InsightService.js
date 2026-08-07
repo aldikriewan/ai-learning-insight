@@ -113,10 +113,14 @@ class InsightService {
     return {
       completion_speed,
       study_consistency_std,
+      study_consistency_ratio: completed_modules / total_modules_viewed || 0,
       avg_study_hour,
       completed_modules,
       total_modules_viewed,
       avg_exam_score,
+      submission_fail_rate: 0,
+      performance_score: avg_exam_score,
+      struggle_score: 0,
       total_courses_enrolled,
       courses_completed,
       optimal_study_time,
@@ -141,9 +145,14 @@ class InsightService {
         features: {
           completion_speed: features.completion_speed,
           study_consistency_std: features.study_consistency_std,
+          study_consistency_ratio: features.study_consistency_ratio,
           avg_study_hour: features.avg_study_hour,
           completed_modules: features.completed_modules,
           total_modules_viewed: features.total_modules_viewed,
+          avg_exam_score: features.avg_exam_score,
+          submission_fail_rate: features.submission_fail_rate,
+          performance_score: features.performance_score,
+          struggle_score: features.struggle_score,
         },
       });
       paceResult = res.data;
