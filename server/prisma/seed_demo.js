@@ -300,6 +300,17 @@ function buildQuizQuestions(courseName, tutorialTitle) {
   ];
 }
 
+// Convert difficulty string to numeric (matches ML training data)
+function difficultyToNum(difficulty) {
+  const d = String(difficulty).toLowerCase();
+  if (d.includes('beginner') || d === '0') return 0;
+  if (d.includes('intermediate') || d === '1') return 1;
+  if (d.includes('advanced') || d === '2') return 2;
+  if (d.includes('expert') || d === '3') return 3;
+  const num = parseInt(d, 10);
+  return isNaN(num) ? 0 : num;
+}
+
 // Circular mean untuk jam (0-24)
 function calcCircularMeanHour(hours) {
   if (!hours.length) return 0;
@@ -415,6 +426,9 @@ function computeBehaviorMetrics(student, trackings, submissions, completions, en
     total_courses_enrolled: totalCoursesEnrolled,
     courses_completed: coursesCompleted,
     optimal_study_time: optimalStudyTime,
+    difficulty: totalCoursesEnrolled > 0 
+      ? enrollments.reduce((sum, e) => sum + (e.difficulty_num || 0), 0) / totalCoursesEnrolled 
+      : 0
   };
 }
 
@@ -552,7 +566,7 @@ async function seedStudentHistory(student, courses) {
         last_accessed_at: lastAccessDate,
       },
     });
-    allEnrollments.push({ id: enrollment.id, journey_id: course.id, status: enrollment.status });
+    allEnrollments.push({ id: enrollment.id, journey_id: course.id, status: enrollment.status, difficulty_num: difficultyToNum(course.difficulty) });
 
     for (let tutorialIndex = 0; tutorialIndex < tutorials.length; tutorialIndex += 1) {
       const tutorial = tutorials[tutorialIndex];

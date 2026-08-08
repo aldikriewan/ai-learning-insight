@@ -1,269 +1,212 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
-}
-
-//user table
 model users {
-  id                                  Int @id @default(autoincrement())
-  display_name                        String?
-  name                                String?
-  email                               String   @unique // Email harus unik untuk login
-  phone                               String?
-  password_hash                       String?
-  user_role                           String   @default("student") // Role: "student" atau "admin"
-  user_verification_status            String?
-  image_path                          String?
-  city                                String?
-  city_id                             Int?
-  custom_city                         String?
-  tz                                  String?
-  verified_at                         DateTime?
-
-  created_at                          DateTime @default(now())
-  updated_at                          DateTime @updatedAt
-  deleted_at                          DateTime?
-  remember_token                      String?
-
-  // Relasi
-  instructed_journeys                 developer_journeys[]       @relation("Instructor")
-  reviewed_journeys                   developer_journeys[]       @relation("Reviewer")
-
-  // Aktivitas Pelajar
-  developer_journey_trackings         developer_journey_trackings[]
-  developer_journey_submissions       developer_journey_submissions[]
-  developer_journey_completions       developer_journey_completions[]
-  exam_registrations                  exam_registrations[]
-  
-  // Relasi ke Quiz
-  quiz_results                        quiz_results[]
-
-  // insight siswa
-  userLearningInsights user_learning_insights[]
+  display_name                  String?
+  name                          String?
+  email                         String                          @unique
+  phone                         String?
+  user_role                     String                          @default("student")
+  user_verification_status      String?
+  created_at                    DateTime                        @default(now())
+  updated_at                    DateTime                        @updatedAt
+  deleted_at                    DateTime?
+  remember_token                String?
+  image_path                    String?
+  city                          String?
+  custom_city                   String?
+  tz                            String?
+  verified_at                   DateTime?
+  password_hash                 String?
+  id                            Int                             @id @default(autoincrement())
+  city_id                       Int?
+  developer_journey_completions developer_journey_completions[]
+  developer_journey_submissions developer_journey_submissions[]
+  developer_journey_trackings   developer_journey_trackings[]
+  instructed_journeys           developer_journeys[]            @relation("Instructor")
+  reviewed_journeys             developer_journeys[]            @relation("Reviewer")
+  enrollments                   enrollments[]
+  exam_registrations            exam_registrations[]
+  quiz_results                  quiz_results[]
+  userLearningInsights          user_learning_insights[]
 
   @@map("users")
-
-  enrollments enrollments[]
 }
 
-// journey and toturial table
 model developer_journeys {
-  id                                  Int @id @default(autoincrement())
-  name                                String
-  summary                             String?
-  description                         String?
-  point                               Int
-  required_point                      Int
-  difficulty                          String // misal: beginner, intermediate
-  image_path                          String?
-  status                              String // misal: published, draft
-  listed                              Boolean @default(true)
-  hours_to_study                      Int?
-
-  // Relasi FK ke users 
-  instructor_id                       Int?
-  reviewer_id                         Int?
-
-  instructor                          users? @relation("Instructor", fields: [instructor_id], references: [id])
-  reviewer                            users? @relation("Reviewer", fields: [reviewer_id], references: [id])
-
-  created_at                          DateTime @default(now())
-  updated_at                          DateTime @updatedAt
-
-  // Relasi
-  developer_journey_tutorials         developer_journey_tutorials[]
-  developer_journey_trackings         developer_journey_trackings[]
-  developer_journey_submissions       developer_journey_submissions[]
-  developer_journey_completions       developer_journey_completions[]
+  name                          String
+  summary                       String?
+  point                         Int
+  required_point                Int
+  difficulty                    String
+  image_path                    String?
+  status                        String
+  listed                        Boolean                         @default(true)
+  created_at                    DateTime                        @default(now())
+  updated_at                    DateTime                        @updatedAt
+  description                   String?
+  hours_to_study                Int?
+  id                            Int                             @id @default(autoincrement())
+  instructor_id                 Int?
+  reviewer_id                   Int?
+  developer_journey_completions developer_journey_completions[]
+  developer_journey_submissions developer_journey_submissions[]
+  developer_journey_trackings   developer_journey_trackings[]
+  developer_journey_tutorials   developer_journey_tutorials[]
+  instructor                    users?                          @relation("Instructor", fields: [instructor_id], references: [id])
+  reviewer                      users?                          @relation("Reviewer", fields: [reviewer_id], references: [id])
+  enrollments                   enrollments[]
 
   @@map("developer_journeys")
-  enrollments enrollments[]
 }
 
 model developer_journey_tutorials {
-  id                                  Int @id @default(autoincrement())
-  developer_journey_id                Int
-  title                               String
-  type                                String // misal: article, quiz, submission, exam
-  content                             String? // Isi materi (HTML/Markdown/ID Quiz/etc)
-  requirements                        Json? // JSON string atau ID dari tutorial yang harus selesai
-  position                            Int
-  status                              String // misal: published, draft
-  trial                               Boolean @default(false)
-
-  created_at                          DateTime @default(now())
-  updated_at                          DateTime @updatedAt
-
-  // Relasi
-  developer_journey                   developer_journeys @relation(fields: [developer_journey_id], references: [id])
-  developer_journey_trackings         developer_journey_trackings[]
-  developer_journey_submissions       developer_journey_submissions[]
-  exam_registrations                  exam_registrations[]
-  
-  // Relasi ke Quiz yang menggunakan tutorial ini
-  quiz_questions                      quiz_questions[]
+  title                         String
+  type                          String
+  content                       String?
+  position                      Int
+  status                        String
+  created_at                    DateTime                        @default(now())
+  updated_at                    DateTime                        @updatedAt
+  trial                         Boolean                         @default(false)
+  requirements                  Json?
+  id                            Int                             @id @default(autoincrement())
+  developer_journey_id          Int
+  developer_journey_submissions developer_journey_submissions[]
+  developer_journey_trackings   developer_journey_trackings[]
+  developer_journey             developer_journeys              @relation(fields: [developer_journey_id], references: [id])
+  exam_registrations            exam_registrations[]
+  quiz_questions                quiz_questions[]
 
   @@map("developer_journey_tutorials")
 }
 
-
-// tracking activities users
 model developer_journey_trackings {
-  id                                  Int @id @default(autoincrement())
-  journey_id                          Int
-  tutorial_id                         Int
-  developer_id                        Int
-  status                              String? // misal: viewed, in_progress, finished
-  
-  last_viewed                         DateTime?
-  first_opened_at                     DateTime @default(now())
-  completed_at                        DateTime?
+  status          String?
+  last_viewed     DateTime?
+  first_opened_at DateTime                    @default(now())
+  completed_at    DateTime?
+  id              Int                         @id @default(autoincrement())
+  journey_id      Int
+  tutorial_id     Int
+  developer_id    Int
+  developer       users                       @relation(fields: [developer_id], references: [id])
+  journey         developer_journeys          @relation(fields: [journey_id], references: [id])
+  tutorial        developer_journey_tutorials @relation(fields: [tutorial_id], references: [id])
 
-  // Relasi
-  journey                             developer_journeys @relation(fields: [journey_id], references: [id])
-  tutorial                            developer_journey_tutorials @relation(fields: [tutorial_id], references: [id])
-  developer                           users @relation(fields: [developer_id], references: [id])
-
-  @@unique([developer_id, tutorial_id]) // Pelajar hanya bisa memiliki 1 tracking per tutorial
-
+  @@unique([developer_id, tutorial_id])
   @@index([developer_id, journey_id, tutorial_id])
-
   @@map("developer_journey_trackings")
 }
 
 model developer_journey_submissions {
-  id                                  Int @id @default(autoincrement())
-  journey_id                          Int
-  quiz_id                             Int // Merujuk ke tutorial bertipe submission
-  submitter_id                        Int
-  status                              String // misal: submitted, under_review, passed, failed
-  app_link                            String?
-  app_comment                         String?
-  reviewer_id                         Int? // Reviewer yang bertugas
-
-  rating                              Float? // Nilai akhir 0.0 - 5.0
-  note                                String? // Feedback
-  
-  // ML-relevant fields
-  submission_duration                  Int? // Durasi submission dalam detik
-  pass_auto_checker                    Boolean? @default(false) // Apakah lulus auto-checker
-
-  created_at                          DateTime @default(now())
-  updated_at                          DateTime @updatedAt
-  
-  // Relasi
-  journey                             developer_journeys @relation(fields: [journey_id], references: [id])
-  quiz                                developer_journey_tutorials @relation(fields: [quiz_id], references: [id])
-  submitter                           users @relation(fields: [submitter_id], references: [id])
+  app_link            String?
+  app_comment         String?
+  status              String
+  created_at          DateTime                    @default(now())
+  updated_at          DateTime                    @updatedAt
+  rating              Float?
+  note                String?
+  id                  Int                         @id @default(autoincrement())
+  journey_id          Int
+  quiz_id             Int
+  submitter_id        Int
+  reviewer_id         Int?
+  pass_auto_checker   Boolean?                    @default(false)
+  submission_duration Int?
+  journey             developer_journeys          @relation(fields: [journey_id], references: [id])
+  quiz                developer_journey_tutorials @relation(fields: [quiz_id], references: [id])
+  submitter           users                       @relation(fields: [submitter_id], references: [id])
 
   @@map("developer_journey_submissions")
 }
 
 model developer_journey_completions {
-  id                                  Int @id @default(autoincrement())
-  user_id                             Int
-  journey_id                          Int
-  study_duration                      Int? // Durasi belajar total (detik)
-  avg_submission_rating               Float? // Rata-rata nilai submission
-  enrolling_times                     Int? @default(1) // Jumlah kali mendaftar kembali (untuk retry_count)
-  last_enrolled_at                     DateTime? // Tanggal enroll terakhir
-
-  created_at                          DateTime @default(now())
-  updated_at                          DateTime @updatedAt
-
-  // Relasi
-  user                                users @relation(fields: [user_id], references: [id])
-  journey                             developer_journeys @relation(fields: [journey_id], references: [id])
+  created_at            DateTime           @default(now())
+  updated_at            DateTime           @updatedAt
+  study_duration        Int?
+  avg_submission_rating Float?
+  id                    Int                @id @default(autoincrement())
+  user_id               Int
+  journey_id            Int
+  enrolling_times       Int?               @default(1)
+  last_enrolled_at      DateTime?
+  journey               developer_journeys @relation(fields: [journey_id], references: [id])
+  user                  users              @relation(fields: [user_id], references: [id])
 
   @@unique([user_id, journey_id])
   @@map("developer_journey_completions")
 }
 
-// quiz and exam table
 model quiz_questions {
-  id                                  Int @id @default(autoincrement())
-  tutorial_id                         Int // FK ke developer_journey_tutorials (type=quiz)
-  question_text                       String
-  question_type                       String // misal: multiple_choice, essay
+  id            Int                         @id @default(autoincrement())
+  tutorial_id   Int
+  question_text String
+  question_type String
+  created_at    DateTime                    @default(now())
+  updated_at    DateTime                    @updatedAt
+  quiz_options  quiz_options[]
+  tutorial      developer_journey_tutorials @relation(fields: [tutorial_id], references: [id])
 
-  created_at                          DateTime @default(now())
-  updated_at                          DateTime @updatedAt
-  
-  // Relasi
-  tutorial                            developer_journey_tutorials @relation(fields: [tutorial_id], references: [id])
-  quiz_options                        quiz_options[]
-  
   @@map("quiz_questions")
 }
 
 model quiz_options {
-  id                                  Int @id @default(autoincrement())
-  question_id                         Int
-  option_text                         String
-  is_correct                          Boolean @default(false)
-  
-  created_at                          DateTime @default(now())
-  updated_at                          DateTime @updatedAt
+  id          Int            @id @default(autoincrement())
+  question_id Int
+  option_text String
+  is_correct  Boolean        @default(false)
+  created_at  DateTime       @default(now())
+  updated_at  DateTime       @updatedAt
+  question    quiz_questions @relation(fields: [question_id], references: [id])
 
-  // Relasi
-  question                            quiz_questions @relation(fields: [question_id], references: [id])
-  
   @@map("quiz_options")
 }
 
 model exam_registrations {
-  id                                  Int @id @default(autoincrement())
-  exam_module_id                      Int?
-  tutorial_id                         Int
-  examinees_id                        Int
-  status                              String // misal: registered, finished
-  
-  created_at                          DateTime @default(now())
-  updated_at                          DateTime @updatedAt
-  
-  // Relasi
-  tutorial                            developer_journey_tutorials @relation(fields: [tutorial_id], references: [id])
-  examinees                           users @relation(fields: [examinees_id], references: [id])
-  exam_results                        exam_results[]
-  
+  status         String
+  created_at     DateTime                    @default(now())
+  updated_at     DateTime                    @updatedAt
+  id             Int                         @id @default(autoincrement())
+  exam_module_id Int?
+  tutorial_id    Int
+  examinees_id   Int
+  examinees      users                       @relation(fields: [examinees_id], references: [id])
+  tutorial       developer_journey_tutorials @relation(fields: [tutorial_id], references: [id])
+  exam_results   exam_results?
+
   @@map("exam_registrations")
 }
 
 model exam_results {
-  id                                  Int @id @default(autoincrement())
-  exam_registration_id                Int @unique
-  total_questions                     Int
-  score                               Float // Skor akhir
-  is_passed                           Boolean
+  total_questions      Int
+  score                Float
+  is_passed            Boolean
+  created_at           DateTime           @default(now())
+  updated_at           DateTime           @updatedAt
+  id                   Int                @id @default(autoincrement())
+  exam_registration_id Int                @unique
+  exam_registration    exam_registrations @relation(fields: [exam_registration_id], references: [id])
 
-  created_at                          DateTime @default(now())
-  updated_at                          DateTime @updatedAt
-  
-  // Relasi
-  exam_registration                   exam_registrations @relation(fields: [exam_registration_id], references: [id])
-  
   @@map("exam_results")
 }
 
 model quiz_results {
-  id                                  Int @id @default(autoincrement())
-  user_id                             Int
-  quiz_id                             Int // Merujuk ke tutorial bertipe quiz
-
-  // Hasil pengerjaan
-  score                               Float
-  time_taken_seconds                  Int
-
-  created_at                          DateTime @default(now())
-  updated_at                          DateTime @updatedAt
-
-  // Relasi
-  user                                users @relation(fields: [user_id], references: [id])
+  id                 Int      @id @default(autoincrement())
+  user_id            Int
+  quiz_id            Int
+  score              Float
+  time_taken_seconds Int
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+  user               users    @relation(fields: [user_id], references: [id])
 
   @@map("quiz_results")
 }
@@ -271,29 +214,26 @@ model quiz_results {
 model user_learning_insights {
   id          Int      @id @default(autoincrement())
   user_id     Int
-  insight_key String   // misal: "predicted_dropout_risk", "recommended_next_course"
-  insight_val Json     // Data hasil analisis
+  insight_key String
+  insight_val Json
   created_at  DateTime @default(now())
-
   user        users    @relation(fields: [user_id], references: [id])
 
   @@index([user_id])
 }
 
 model enrollments {
-  id          Int      @id @default(autoincrement())
-  user_id     Int
-  journey_id  Int
-  status      String   @default("active") // active, completed, dropped
-  enrolled_at DateTime @default(now())
-  
-  current_progress Float @default(0.0) 
+  id               Int                @id @default(autoincrement())
+  user_id          Int
+  journey_id       Int
+  status           String             @default("active")
+  enrolled_at      DateTime           @default(now())
+  current_progress Float              @default(0.0)
   last_accessed_at DateTime?
+  journey          developer_journeys @relation(fields: [journey_id], references: [id])
+  user             users              @relation(fields: [user_id], references: [id])
 
-  user    users              @relation(fields: [user_id], references: [id])
-  journey developer_journeys @relation(fields: [journey_id], references: [id])
-
-  @@unique([user_id, journey_id]) // Satu user hanya bisa enroll 1x per kelas
+  @@unique([user_id, journey_id])
   @@index([user_id])
   @@map("enrollments")
 }

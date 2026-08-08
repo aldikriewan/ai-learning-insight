@@ -81,7 +81,7 @@ class InsightService {
       }),
       prisma.enrollments.findMany({
         where: { user_id: userId },
-        select: { enrolled_at: true, last_accessed_at: true, status: true, journey: { select: { hours_to_study: true, name: true } } },
+        select: { enrolled_at: true, last_accessed_at: true, status: true, journey: { select: { hours_to_study: true, name: true, difficulty: true } } },
       }),
       prisma.developer_journey_submissions.findMany({
         where: { submitter_id: userId },
@@ -115,6 +115,20 @@ class InsightService {
     const completedEnrollments = allEnrollments.filter(e => e.status === "completed");
     const total_courses_enrolled = allEnrollments.length;
     const courses_completed = completedEnrollments.length;
+
+    // Difficulty (numeric average from enrolled courses)
+    const difficultyToNum = (d) => {
+      const s = String(d || '').toLowerCase();
+      if (s.includes('beginner') || s === '0') return 0;
+      if (s.includes('intermediate') || s === '1') return 1;
+      if (s.includes('advanced') || s === '2') return 2;
+      if (s.includes('expert') || s === '3') return 3;
+      const n = parseInt(s, 10);
+      return isNaN(n) ? 0 : n;
+    };
+    const difficulty = allEnrollments.length > 0
+      ? allEnrollments.reduce((sum, e) => sum + (e.journey ? difficultyToNum(e.journey.difficulty) : 0), 0) / allEnrollments.length
+      : 0;
 
     // Completion speed: study_duration / hours_to_study (as per ML training)
     const completionSpeeds = [];
@@ -193,6 +207,8 @@ class InsightService {
       total_courses_enrolled,
       courses_completed,
       optimal_study_time,
+      difficulty,
+      avg_submission_rating: Math.round(avg_submission_rating * 100) / 100,
     };
   }
 
@@ -280,17 +296,21 @@ class InsightService {
       const res = await axios.post(`${mlUrl}/api/v1/persona/predict`, {
         user_id: userId,
         features: {
-          avg_study_hour: features.avg_study_hour,
           study_consistency_std: features.study_consistency_std,
-          completion_speed: features.completion_speed,
-          avg_exam_score: features.avg_exam_score,
+          total_modules_viewed: features.total_modules_viewed,
           submission_fail_rate: features.submission_fail_rate,
           retry_count: features.retry_count,
+          avg_submission_rating: features.avg_submission_rating,
+          difficulty: features.difficulty,
         },
       });
       personaResult = res.data;
     } catch (e) {
       console.error("ML Persona Error:", e.message);
+      if (e.response) {
+        console.error("Response data:", JSON.stringify(e.response.data, null, 2));
+        console.error("Response status:", e.response.status);
+      }
       personaResult = {
         persona_label: "The Consistent",
         cluster_id: 0,
