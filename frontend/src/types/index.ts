@@ -78,19 +78,34 @@ export interface CompletionResponse {
 export interface AIInsight {
   generated_at: string;
   persona?: {
-    cluster_id: number;
+    user_id: number;
     persona_label: string;
+    cluster_id: number;
     confidence: number;
+    description: string;
+    criteria: string;
     characteristics: string[];
   };
   pace?: {
+    user_id: number;
+    journey_id: number;
+    journey_name: string;
     pace_label: string;
-    confidence?: number;
+    pace_percentage: number;
+    cluster_id: number;
+    confidence: number;
     insight: string;
+    user_duration_hours: number;
+    avg_duration_hours: number;
+    expected_duration_hours: number;
+    percentile_rank: number;
   };
   advice?: {
-    advice_text: string;
     user_id: number;
+    name: string;
+    advice_text: string;
+    persona_context: string;
+    pace_context: string;
   };
   features?: {
     optimal_study_time?: string;
@@ -99,6 +114,14 @@ export interface AIInsight {
     completed_modules?: number;
     total_modules_viewed?: number;
     avg_exam_score?: number;
+    completion_speed?: number;
+    study_consistency_std?: number;
+    study_consistency_ratio?: number;
+    submission_fail_rate?: number;
+    performance_score?: number;
+    struggle_score?: number;
+    retry_count?: number;
+    avg_study_hour?: number;
   };
 }
 

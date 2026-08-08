@@ -437,6 +437,8 @@ async function seedStudentHistory(student, courses) {
             reviewer_id: null,
             rating: randFloat(behavior.avgSubmissionRating[0], behavior.avgSubmissionRating[1]),
             note: submissionState === "failed" ? "Perlu perbaikan pada struktur dan konsistensi implementasi." : "Progress terlihat valid dan sesuai pola belajar yang dipilih.",
+            submission_duration: randInt(600, 7200),
+            pass_auto_checker: submissionState === "passed",
           },
         });
         allSubmissions.push(submission);
@@ -460,12 +462,15 @@ async function seedStudentHistory(student, courses) {
 
     const completionSpeed = randFloat(behavior.completionSpeed[0], behavior.completionSpeed[1]);
     if (isCompleted || completionRatio >= 0.7) {
+      const enrollingTimes = randInt(behavior.retryCount[0] + 1, behavior.retryCount[1] + 1);
       const completion = await prisma.developer_journey_completions.create({
         data: {
           user_id: student.id,
           journey_id: course.id,
           study_duration: Math.max(1, Math.round(course.hours_to_study * completionSpeed)),
           avg_submission_rating: randFloat(behavior.avgSubmissionRating[0], behavior.avgSubmissionRating[1]),
+          enrolling_times: enrollingTimes,
+          last_enrolled_at: new Date(enrolledAt.getTime() + randInt(0, finishedModules * dayGap * 24 * 60 * 60 * 1000)),
         },
       });
       allCompletions.push(completion);

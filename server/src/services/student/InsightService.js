@@ -30,15 +30,36 @@ class InsightService {
     return (meanAngle / (2 * Math.PI)) * 24;
   }
 
-  // Circular std untuk jam
-  calcCircularStdHour(hours) {
-    if (hours.length <= 1) return 0;
-    const radians = hours.map(h => (h / 24) * 2 * Math.PI);
-    const sinSum = radians.reduce((sum, r) => sum + Math.sin(r), 0);
-    const cosSum = radians.reduce((sum, r) => sum + Math.cos(r), 0);
-    const R = Math.sqrt(sinSum ** 2 + cosSum ** 2) / hours.length;
-    const circularVariance = Math.max(0, Math.min(1 - R, 0.9999));
-    return Math.sqrt(-2 * Math.log(1 - circularVariance)) * (24 / (2 * Math.PI));
+  // Day gap std (as per ML training): std of gaps between consecutive study dates
+  calcDayGapStd(dates) {
+    if (dates.length <= 1) return 0;
+    const sortedDates = [...new Set(dates)].sort();
+    if (sortedDates.length <= 1) return 0;
+    
+    const gaps = [];
+    for (let i = 1; i < sortedDates.length; i++) {
+      const d1 = new Date(sortedDates[i - 1]);
+      const d2 = new Date(sortedDates[i]);
+      const diff = (d2 - d1) / (1000 * 60 * 60 * 24);
+      gaps.push(diff);
+    }
+    
+    if (gaps.length <= 1) return 0;
+    const mean = gaps.reduce((a, b) => a + b, 0) / gaps.length;
+    const variance = gaps.reduce((sq, n) => sq + Math.pow(n - mean, 2), 0) / (gaps.length - 1);
+    return Math.sqrt(variance);
+  }
+
+  // Study consistency ratio (as per ML training): unique dates / date range
+  calcStudyConsistencyRatio(dates) {
+    const uniqueDates = [...new Set(dates)].sort();
+    if (uniqueDates.length <= 1) return 1;
+    
+    const firstDate = new Date(uniqueDates[0]);
+    const lastDate = new Date(uniqueDates[uniqueDates.length - 1]);
+    const dateRange = (lastDate - firstDate) / (1000 * 60 * 60 * 24) + 1;
+    
+    return uniqueDates.length / dateRange;
   }
 
   // Ambil dan hitung fitur untuk ML
@@ -46,15 +67,21 @@ class InsightService {
     const [trackings, examResults, allEnrollments, submissions] = await Promise.all([
       prisma.developer_journey_trackings.findMany({
         where: { developer_id: userId },
-        select: { last_viewed: true, first_opened_at: true, tutorial_id: true, status: true },
+        select: { 
+          last_viewed: true, 
+          first_opened_at: true, 
+          tutorial_id: true, 
+          status: true,
+          journey: { select: { id: true, hours_to_study: true, name: true } }
+        },
       }),
       prisma.exam_results.findMany({
         where: { exam_registration: { examinees_id: userId } },
-        select: { score: true },
+        select: { score: true, is_passed: true, exam_registration: { select: { tutorial: { select: { developer_journey_id: true } } } } },
       }),
       prisma.enrollments.findMany({
         where: { user_id: userId },
-        select: { enrolled_at: true, last_accessed_at: true, status: true },
+        select: { enrolled_at: true, last_accessed_at: true, status: true, journey: { select: { hours_to_study: true, name: true } } },
       }),
       prisma.developer_journey_submissions.findMany({
         where: { submitter_id: userId },
@@ -68,58 +95,71 @@ class InsightService {
       .map(t => new Date(t.last_viewed).getHours());
 
     const avg_study_hour = this.calcCircularMeanHour(studyHours);
-    const study_consistency_std = this.calcCircularStdHour(studyHours);
+
+    // Study dates for consistency calculation
+    const studyDates = trackings
+      .filter(t => t.last_viewed)
+      .map(t => new Date(t.last_viewed).toISOString().split('T')[0]);
+
+    const study_consistency_std = this.calcDayGapStd(studyDates);
+    const study_consistency_ratio = this.calcStudyConsistencyRatio(studyDates);
 
     // Skor exam
     const scores = examResults.map(e => parseFloat(e.score));
     const avg_exam_score = this.calcMean(scores);
+    
+    // Exam fail count
+    const exam_fail_count = examResults.filter(e => !e.is_passed).length;
 
     // Enrollment stats
     const completedEnrollments = allEnrollments.filter(e => e.status === "completed");
     const total_courses_enrolled = allEnrollments.length;
     const courses_completed = completedEnrollments.length;
 
-    // Completion speed dari enrollment yang selesai
-    const durations = [];
+    // Completion speed: study_duration / hours_to_study (as per ML training)
+    const completionSpeeds = [];
     completedEnrollments.forEach(en => {
-      if (en.last_accessed_at) {
+      if (en.journey && en.journey.hours_to_study && en.journey.hours_to_study > 0 && en.last_accessed_at) {
         const diffMs = new Date(en.last_accessed_at) - new Date(en.enrolled_at);
-        durations.push(diffMs / (1000 * 60 * 60));
+        const durationHours = diffMs / (1000 * 60 * 60);
+        const ratio = durationHours / en.journey.hours_to_study;
+        completionSpeeds.push(Math.min(ratio, 10)); // Clip to max 10 as per training
       }
     });
 
-    const avgDuration = this.calcMean(durations);
-    const completion_speed = avgDuration > 0 ? avgDuration / 20.0 : 1.0;
+    const completion_speed = completionSpeeds.length > 0 
+      ? this.calcMean(completionSpeeds) 
+      : 1.0;
 
     // Modul stats
     const completed_modules = trackings.filter(t => t.status === 'finished').length;
     const total_modules_viewed = trackings.length;
 
-    // Submission fail rate
+    // Submission fail rate and fail count
     const totalSubmissions = submissions.length;
     const failedSubmissions = submissions.filter(s => ['failed', 'revision_requested', 'rejected'].includes(s.status)).length;
     const submission_fail_rate = totalSubmissions > 0 ? failedSubmissions / totalSubmissions : 0.0;
+    const submission_fail_count = failedSubmissions;
 
-    // Retry count dari completions
+    // Retry count: enrolling_times from completions (as per ML training)
     const completions = await prisma.developer_journey_completions.findMany({
       where: { user_id: userId },
-      select: { study_duration: true, enrolling_times: true },
+      select: { study_duration: true, enrolling_times: true, avg_submission_rating: true },
     });
-    const retryCount = completions.filter(c => c.enrolling_times > 1).reduce((a, c) => a + (c.enrolling_times - 1), 0);
+    
+    const retry_count = completions.filter(c => c.enrolling_times && c.enrolling_times > 1)
+      .reduce((a, c) => a + c.enrolling_times, 0);
 
-    // Performance score: kombinasi exam score dan submission success
-    const examScore = avg_exam_score || 0;
-    const submissionSuccess = 1 - Math.min(submission_fail_rate, 1);
-    const performance_score = Math.min(100, (examScore / 100) * 0.6 + submissionSuccess * 0.4 * 100);
+    // Avg submission rating
+    const avg_submission_rating = this.calcMean(submissions.map(s => s.rating || 0).filter(r => r > 0));
 
-    // Struggle score: kombinasi fail rate, low exam score, dan retry
-    const struggle_score = Math.max(0, 
-      (submission_fail_rate * 100) + 
-      Math.max(0, 100 - examScore) * 0.5 + 
-      (retryCount * 2)
-    );
+    // Performance score (as per ML training): avg_exam_score * 0.4 + avg_submission_rating * 20 * 0.6
+    const performance_score = (avg_exam_score * 0.4) + (avg_submission_rating * 20 * 0.6);
 
-    // Hitung waktu belajar optimal
+    // Struggle score (as per ML training): exam_fail_count + submission_fail_count * 2
+    const struggle_score = exam_fail_count + (submission_fail_count * 2);
+
+    // Optimal study time
     const hourCounts = {};
     studyHours.forEach(h => {
       const period = h >= 5 && h < 12 ? "Pagi" 
@@ -141,7 +181,7 @@ class InsightService {
     return {
       completion_speed: Math.round(completion_speed * 100) / 100,
       study_consistency_std: Math.round(study_consistency_std * 100) / 100,
-      study_consistency_ratio: total_modules_viewed > 0 ? Math.round((completed_modules / total_modules_viewed) * 100) / 100 : 0,
+      study_consistency_ratio: Math.round(study_consistency_ratio * 100) / 100,
       avg_study_hour: Math.round(avg_study_hour * 100) / 100,
       completed_modules,
       total_modules_viewed,
@@ -149,7 +189,7 @@ class InsightService {
       submission_fail_rate: Math.round(submission_fail_rate * 100) / 100,
       performance_score: Math.round(performance_score * 100) / 100,
       struggle_score: Math.round(struggle_score * 100) / 100,
-      retry_count: retryCount,
+      retry_count,
       total_courses_enrolled,
       courses_completed,
       optimal_study_time,
@@ -234,8 +274,41 @@ class InsightService {
       adviceResult = { advice_text: advice };
     }
 
+    // Get persona prediction
+    let personaResult = null;
+    try {
+      const res = await axios.post(`${mlUrl}/api/v1/persona/predict`, {
+        user_id: userId,
+        features: {
+          avg_study_hour: features.avg_study_hour,
+          study_consistency_std: features.study_consistency_std,
+          completion_speed: features.completion_speed,
+          avg_exam_score: features.avg_exam_score,
+          submission_fail_rate: features.submission_fail_rate,
+          retry_count: features.retry_count,
+        },
+      });
+      personaResult = res.data;
+    } catch (e) {
+      console.error("ML Persona Error:", e.message);
+      personaResult = {
+        persona_label: "The Consistent",
+        cluster_id: 0,
+        confidence: 0.5,
+        description: "Belajar secara konsisten dan teratur",
+        criteria: "study_consistency_std rendah",
+        characteristics: ["Belajar secara konsisten"],
+      };
+    }
+
+    // Update advice with persona context if available
+    if (personaResult && adviceResult) {
+      adviceResult.persona_context = personaResult.persona_label;
+    }
+
     // Simpan ke database
     const insightData = {
+      persona: personaResult,
       pace: paceResult,
       advice: adviceResult,
       features: features,

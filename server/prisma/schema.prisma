@@ -148,6 +148,10 @@ model developer_journey_submissions {
 
   rating                              Float? // Nilai akhir 0.0 - 5.0
   note                                String? // Feedback
+  
+  // ML-relevant fields
+  submission_duration                  Int? // Durasi submission dalam detik
+  pass_auto_checker                    Boolean? @default(false) // Apakah lulus auto-checker
 
   created_at                          DateTime @default(now())
   updated_at                          DateTime @updatedAt
@@ -166,6 +170,8 @@ model developer_journey_completions {
   journey_id                          Int
   study_duration                      Int? // Durasi belajar total (detik)
   avg_submission_rating               Float? // Rata-rata nilai submission
+  enrolling_times                     Int? @default(1) // Jumlah kali mendaftar kembali (untuk retry_count)
+  last_enrolled_at                     DateTime? // Tanggal enroll terakhir
 
   created_at                          DateTime @default(now())
   updated_at                          DateTime @updatedAt
