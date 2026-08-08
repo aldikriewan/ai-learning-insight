@@ -230,52 +230,104 @@ function buildQuizQuestions(courseName, tutorialTitle) {
   ];
 }
 
-function computeBehaviorMetrics(student, trackings, submissions, completions, enrollments, examResults, behavior) {
-  const totalTrackings = trackings.length;
-  const studyHours = trackings.map((t) => {
-    const d = new Date(t.last_viewed || t.first_opened_at);
-    return d.getHours() + d.getMinutes() / 60;
-  });
-  const avgStudyHour = studyHours.length > 0 ? studyHours.reduce((a, b) => a + b, 0) / studyHours.length : 12.0;
+// Circular mean untuk jam (0-24)
+function calcCircularMeanHour(hours) {
+  if (!hours.length) return 0;
+  const radians = hours.map(h => (h / 24) * 2 * Math.PI);
+  const sinSum = radians.reduce((sum, r) => sum + Math.sin(r), 0);
+  const cosSum = radians.reduce((sum, r) => sum + Math.cos(r), 0);
+  let meanAngle = Math.atan2(sinSum / hours.length, cosSum / hours.length);
+  if (meanAngle < 0) meanAngle += 2 * Math.PI;
+  return (meanAngle / (2 * Math.PI)) * 24;
+}
 
-  const dates = [...new Set(trackings.map((t) => {
-    const d = new Date(t.last_viewed || t.first_opened_at);
-    return d.toISOString().split('T')[0];
-  }))].sort();
+// Compute ML features matching exact training formulas (notebook 02)
+function computeBehaviorMetrics(student, trackings, submissions, completions, enrollments, examResults, behavior) {
+  const studyHours = trackings
+    .filter(t => t.last_viewed)
+    .map(t => {
+      const d = new Date(t.last_viewed);
+      return d.getHours() + d.getMinutes() / 60;
+    });
+
+  const avgStudyHour = studyHours.length > 0 ? calcCircularMeanHour(studyHours) : 12.0;
+
+  const dates = [...new Set(trackings
+    .filter(t => t.last_viewed)
+    .map(t => new Date(t.last_viewed).toISOString().split('T')[0])
+  )].sort();
+
   let studyConsistencyStd = 0.0;
   if (dates.length > 1) {
     const gaps = [];
     for (let i = 1; i < dates.length; i++) {
       const d1 = new Date(dates[i - 1]);
       const d2 = new Date(dates[i]);
-      const diff = (d2 - d1) / (1000 * 60 * 60 * 24);
-      gaps.push(diff);
+      gaps.push((d2 - d1) / (1000 * 60 * 60 * 24));
     }
-    const mean = gaps.reduce((a, b) => a + b, 0) / gaps.length;
-    const variance = gaps.reduce((a, b) => a + (b - mean) ** 2, 0) / gaps.length;
-    studyConsistencyStd = Math.sqrt(variance);
+    if (gaps.length > 1) {
+      const mean = gaps.reduce((a, b) => a + b, 0) / gaps.length;
+      const variance = gaps.reduce((sq, n) => sq + Math.pow(n - mean, 2), 0) / (gaps.length - 1);
+      studyConsistencyStd = Math.sqrt(variance);
+    }
   }
 
-  const totalModulesViewed = new Set(trackings.map((t) => t.tutorial_id)).size;
-  const completedModules = trackings.filter((t) => t.status === 'finished').length;
+  let studyConsistencyRatio = 0;
+  if (dates.length > 0) {
+    const firstDate = new Date(dates[0]);
+    const lastDate = new Date(dates[dates.length - 1]);
+    const dateRange = (lastDate - firstDate) / (1000 * 60 * 60 * 24) + 1;
+    studyConsistencyRatio = dates.length / dateRange;
+  }
 
-  const examScores = examResults.map((e) => e.score).filter((s) => s != null);
+  const completedModules = trackings.filter(t => t.status === 'finished').length;
+  const totalModulesViewed = trackings.length;
+
+  const examScores = examResults.map(e => e.score).filter(s => s != null);
   const avgExamScore = examScores.length > 0 ? examScores.reduce((a, b) => a + b, 0) / examScores.length : 75.0;
+  const examFailCount = examResults.filter(e => !e.is_passed && e.score != null).length;
 
   const totalSubmissions = submissions.length;
-  const failedSubmissions = submissions.filter((s) => ['failed', 'revision_requested', 'rejected'].includes(s.status)).length;
+  const failedSubmissions = submissions.filter(s => ['failed', 'revision_requested', 'rejected'].includes(s.status)).length;
   const submissionFailRate = totalSubmissions > 0 ? failedSubmissions / totalSubmissions : 0.0;
 
-  const retryCount = completions.filter((c) => c.enrolling_times > 1).reduce((a, c) => a + (c.enrolling_times - 1), 0);
+  const retryCount = completions.filter((c) => c.enrolling_times > 1).reduce((a, c) => a + c.enrolling_times, 0);
 
   const totalCoursesEnrolled = enrollments.length;
-  const coursesCompleted = enrollments.filter((e) => e.status === 'completed').length;
+  const coursesCompleted = enrollments.filter(e => e.status === 'completed').length;
 
-  const completionSpeed = completions.length > 0 ? completions.reduce((a, c) => a + (c.study_duration || 40), 0) / completions.length : 1.0;
-  const performanceScore = avgExamScore > 0 ? Math.min(100, (avgExamScore / 100) * 0.5 + (1 - Math.min(submissionFailRate, 1)) * 0.5) * 100 : 50.0;
-  const struggleScore = Math.max(0, (submissionFailRate * 100) + (100 - avgExamScore) * 0.5 + (retryCount * 2));
-  const studyConsistencyRatio = studyConsistencyStd > 0 ? Math.max(0, 1 - studyConsistencyStd / 7) : 0.5;
-  const optimalStudyTime = avgStudyHour >= 19 || avgStudyHour < 6 ? "Malam" : avgStudyHour >= 12 ? "Siang" : "Pagi";
+  const completionSpeeds = completions
+    .filter(c => c.study_duration && c.hours_to_study && c.hours_to_study > 0)
+    .map(c => Math.min(c.study_duration / c.hours_to_study, 10));
+  const completionSpeed = completionSpeeds.length > 0
+    ? completionSpeeds.reduce((a, b) => a + b, 0) / completionSpeeds.length
+    : 1.0;
+
+  const ratedSubmissions = submissions.filter(s => s.rating && s.rating > 0);
+  const avgSubmissionRating = ratedSubmissions.length > 0
+    ? ratedSubmissions.reduce((a, s) => a + s.rating, 0) / ratedSubmissions.length
+    : 0;
+
+  const performanceScore = (avgExamScore * 0.4) + (avgSubmissionRating * 20 * 0.6);
+  const struggleScore = examFailCount + (failedSubmissions * 2);
+
+  const hourCounts = {};
+  studyHours.forEach(h => {
+    const period = h >= 5 && h < 12 ? "Pagi"
+      : h >= 12 && h < 17 ? "Siang"
+      : h >= 17 && h < 19 ? "Sore"
+      : h >= 19 ? "Malam" : "Dini Hari";
+    hourCounts[period] = (hourCounts[period] || 0) + 1;
+  });
+
+  let optimalStudyTime = "Pagi";
+  let maxCount = 0;
+  Object.entries(hourCounts).forEach(([period, count]) => {
+    if (count > maxCount) {
+      maxCount = count;
+      optimalStudyTime = period;
+    }
+  });
 
   return {
     avg_study_hour: Math.round(avgStudyHour * 100) / 100,
