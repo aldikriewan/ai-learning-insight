@@ -43,10 +43,10 @@ class InsightService {
 
   // Ambil dan hitung fitur untuk ML
   async prepareFeatures(userId) {
-    const [trackings, examResults, allEnrollments] = await Promise.all([
+    const [trackings, examResults, allEnrollments, submissions] = await Promise.all([
       prisma.developer_journey_trackings.findMany({
         where: { developer_id: userId },
-        select: { last_viewed: true, first_opened_at: true },
+        select: { last_viewed: true, first_opened_at: true, tutorial_id: true, status: true },
       }),
       prisma.exam_results.findMany({
         where: { exam_registration: { examinees_id: userId } },
@@ -55,6 +55,10 @@ class InsightService {
       prisma.enrollments.findMany({
         where: { user_id: userId },
         select: { enrolled_at: true, last_accessed_at: true, status: true },
+      }),
+      prisma.developer_journey_submissions.findMany({
+        where: { submitter_id: userId },
+        select: { status: true },
       }),
     ]);
 
@@ -88,8 +92,32 @@ class InsightService {
     const completion_speed = avgDuration > 0 ? avgDuration / 20.0 : 1.0;
 
     // Modul stats
-    const completed_modules = trackings.filter(t => t.last_viewed).length;
+    const completed_modules = trackings.filter(t => t.status === 'finished').length;
     const total_modules_viewed = trackings.length;
+
+    // Submission fail rate
+    const totalSubmissions = submissions.length;
+    const failedSubmissions = submissions.filter(s => ['failed', 'revision_requested', 'rejected'].includes(s.status)).length;
+    const submission_fail_rate = totalSubmissions > 0 ? failedSubmissions / totalSubmissions : 0.0;
+
+    // Retry count dari completions
+    const completions = await prisma.developer_journey_completions.findMany({
+      where: { user_id: userId },
+      select: { study_duration: true, enrolling_times: true },
+    });
+    const retryCount = completions.filter(c => c.enrolling_times > 1).reduce((a, c) => a + (c.enrolling_times - 1), 0);
+
+    // Performance score: kombinasi exam score dan submission success
+    const examScore = avg_exam_score || 0;
+    const submissionSuccess = 1 - Math.min(submission_fail_rate, 1);
+    const performance_score = Math.min(100, (examScore / 100) * 0.6 + submissionSuccess * 0.4 * 100);
+
+    // Struggle score: kombinasi fail rate, low exam score, dan retry
+    const struggle_score = Math.max(0, 
+      (submission_fail_rate * 100) + 
+      Math.max(0, 100 - examScore) * 0.5 + 
+      (retryCount * 2)
+    );
 
     // Hitung waktu belajar optimal
     const hourCounts = {};
@@ -111,16 +139,17 @@ class InsightService {
     });
 
     return {
-      completion_speed,
-      study_consistency_std,
-      study_consistency_ratio: completed_modules / total_modules_viewed || 0,
-      avg_study_hour,
+      completion_speed: Math.round(completion_speed * 100) / 100,
+      study_consistency_std: Math.round(study_consistency_std * 100) / 100,
+      study_consistency_ratio: total_modules_viewed > 0 ? Math.round((completed_modules / total_modules_viewed) * 100) / 100 : 0,
+      avg_study_hour: Math.round(avg_study_hour * 100) / 100,
       completed_modules,
       total_modules_viewed,
-      avg_exam_score,
-      submission_fail_rate: 0,
-      performance_score: avg_exam_score,
-      struggle_score: 0,
+      avg_exam_score: Math.round(avg_exam_score * 100) / 100,
+      submission_fail_rate: Math.round(submission_fail_rate * 100) / 100,
+      performance_score: Math.round(performance_score * 100) / 100,
+      struggle_score: Math.round(struggle_score * 100) / 100,
+      retry_count: retryCount,
       total_courses_enrolled,
       courses_completed,
       optimal_study_time,

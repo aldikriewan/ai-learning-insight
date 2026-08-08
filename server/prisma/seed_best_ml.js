@@ -4,7 +4,7 @@ const { PrismaClient } = require("@prisma/client");
 const bcrypt = require("bcrypt");
 const prisma = new PrismaClient();
 
-const SEED_NAME = "best";
+const SEED_NAME = "ml-ready";
 const SEED_TAG = `seed_${SEED_NAME}`;
 
 const ADMIN = {
@@ -563,7 +563,7 @@ async function main() {
     await seedStudentHistory(student, courses);
   }
 
-  console.log(`[${SEED_TAG}] Best seed finished successfully.`);
+  console.log(`[${SEED_TAG}] ML-ready seed finished successfully.`);
   console.log(`[${SEED_TAG}] Created courses: ${courses.length}`);
   console.log(`[${SEED_TAG}] Created students: ${students.length}`);
   console.log(`[${SEED_TAG}] Default password: ${DEFAULT_PASSWORD}`);
