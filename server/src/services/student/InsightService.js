@@ -176,9 +176,9 @@ class InsightService {
     // Optimal study time
     const hourCounts = {};
     studyHours.forEach(h => {
-      const period = h >= 5 && h < 12 ? "Pagi" 
-                   : h >= 12 && h < 17 ? "Siang"
-                   : h >= 17 && h < 19 ? "Sore"
+      const period = h >= 5 && h < 11 ? "Pagi" 
+                   : h >= 11 && h < 15 ? "Siang"
+                   : h >= 15 && h < 19 ? "Sore"
                    : h >= 19 && h < 24 ? "Malam" : "Dini Hari";
       hourCounts[period] = (hourCounts[period] || 0) + 1;
     });
