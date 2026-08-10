@@ -9,10 +9,11 @@
     "db:migrate": "prisma migrate dev -n init",
     "db:seed": "node prisma/seed_users.js",
     "db:seed:best": "node prisma/seed_best.js",
+    "db:seed:best:ml": "node prisma/seed_best_ml.js",
     "db:seed:demo": "node prisma/seed_demo.js",
     "db:seed:presentation": "node prisma/seed_presentation.js",
     "db:reset-enroll": "ts-node ./prisma/resetEnroll.ts",
-    "start": "node dist/index.js",
+    "start": "node src/server.js",
     "build": "tsc"
   },
   "keywords": [],
