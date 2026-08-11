@@ -181,7 +181,7 @@ const features = [
               </h1>
               
               <p className="text-lg text-muted-foreground max-w-lg leading-relaxed">
-                Platform pembelajaran coding interaktif dengan kursu terstruktur dan feedback real-time. 
+                Platform pembelajaran coding interaktif dengan kursus terstruktur dan feedback real-time. 
                 Belajar dengan kecepatan mu sendiri dan raih karir impianmu.
               </p>
 
