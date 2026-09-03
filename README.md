@@ -504,6 +504,28 @@ Project ini dapat di-containerize menggunakan Docker untuk deployment yang konsi
 
 ---
 
+## Machine Learning Component
+
+> **Note:** The ML component (`ml-ai-learning-insight`) is maintained in a **separate private repository** due to sensitive training data containing Personally Identifiable Information (PII).
+
+### Model Overview
+
+| Model | Type | Status | Performance |
+|-------|------|--------|-------------|
+| Pace Classifier | Random Forest Classifier | ✅ Active | **80.92% test accuracy**, 82.91% 5-Fold CV, F1-score 0.81 |
+| Advice Generator | LLM via OpenRouter API (Mistral) | ✅ Active | ~1–3s response time |
+| Persona Classifier | Random Forest (archived) | 🔒 Archived | — |
+
+### Methodology
+
+- **Leakage-free approach:** Labels generated via K-Means clustering on independent binary scores, training classifier on `X_train` only, evaluated on held-out `X_test` (stratified 80:20 split)
+- **API latency:** ~50–100ms per prediction request
+- **ML API is decoupled from the database** — all feature engineering is handled by the Backend before sending to ML-API
+
+> The ML repository and model artifacts are available for review upon request.
+
+---
+
 ## Kontribusi
 
 Kontribusi sangat diterima! Berikut langkah-langkah untuk berkontribusi:
